@@ -19,25 +19,31 @@ const CanvasImage = () => {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
 
-      for (let y = 0; y < canvas.height; y += pixel) {
-        for (let x = 0; x < canvas.width; x += pixel) {
-          let [r, g, b, count] = [0, 0, 0, 0];
+      const w = canvas.width;
+      const h = canvas.height;
 
-          const maxY = Math.min(pixel, canvas.height - y);
-          const maxX = Math.min(pixel, canvas.width - x);
+      for (let y = 0; y < h; y += pixel) {
+        for (let x = 0; x < w; x += pixel) {
+          const maxY = Math.min(pixel, h - y);
+          const maxX = Math.min(pixel, w - x);
+          const area = maxX * maxY;
+
+          let r = 0;
+          let g = 0;
+          let b = 0;
+          const yOffset = y * w;
 
           for (let by = 0; by < maxY; by++) {
+            const idx = (yOffset + by * w + x) * 4;
             for (let bx = 0; bx < maxX; bx++) {
-              const idx = ((y + by) * canvas.width + (x + bx)) * 4;
-              r += data[idx];
-              g += data[idx + 1];
-              b += data[idx + 2];
-              count++;
+              const pixelIdx = idx + bx * 4;
+              r += data[pixelIdx];
+              g += data[pixelIdx + 1];
+              b += data[pixelIdx + 2];
             }
           }
 
-          const avgColor = `rgb(${Math.round(r / count)},${Math.round(g / count)},${Math.round(b / count)})`;
-          ctx.fillStyle = avgColor;
+          ctx.fillStyle = `rgb(${(r / area) | 0},${(g / area) | 0},${(b / area) | 0})`;
           ctx.fillRect(x, y, pixel, pixel);
         }
       }
